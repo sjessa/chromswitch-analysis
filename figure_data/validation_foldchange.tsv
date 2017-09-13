@@ -1,0 +1,67 @@
+thresholds	Method	Input	median_logFC	Label
+0	Summary	H3K4me3	-0.15890597975872206	Method: Summary, Input: H3K4me3
+0.1	Summary	H3K4me3	0.07743157615340637	Method: Summary, Input: H3K4me3
+0.2	Summary	H3K4me3	0.5305964340362285	Method: Summary, Input: H3K4me3
+0.30000000000000004	Summary	H3K4me3	1.0430868415833252	Method: Summary, Input: H3K4me3
+0.4	Summary	H3K4me3	1.3940109032056305	Method: Summary, Input: H3K4me3
+0.5	Summary	H3K4me3	1.8029631950666347	Method: Summary, Input: H3K4me3
+0.6000000000000001	Summary	H3K4me3	2.0591431121187553	Method: Summary, Input: H3K4me3
+0.7000000000000001	Summary	H3K4me3	2.1511278027998038	Method: Summary, Input: H3K4me3
+0.8	Summary	H3K4me3	2.3608919577916696	Method: Summary, Input: H3K4me3
+0.9	Summary	H3K4me3	2.3318854123566486	Method: Summary, Input: H3K4me3
+1	Summary	H3K4me3	2.388887872763258	Method: Summary, Input: H3K4me3
+0	Summary	DNase I	-0.1566614740285889	Method: Summary, Input: DNase I
+0.1	Summary	DNase I	0.04247843513245984	Method: Summary, Input: DNase I
+0.2	Summary	DNase I	0.31504462738311967	Method: Summary, Input: DNase I
+0.30000000000000004	Summary	DNase I	0.7455892524708092	Method: Summary, Input: DNase I
+0.4	Summary	DNase I	1.0691699403643706	Method: Summary, Input: DNase I
+0.5	Summary	DNase I	1.3390411518037193	Method: Summary, Input: DNase I
+0.6000000000000001	Summary	DNase I	1.4702560415081298	Method: Summary, Input: DNase I
+0.7000000000000001	Summary	DNase I	1.528101250492696	Method: Summary, Input: DNase I
+0.8	Summary	DNase I	1.763151448308844	Method: Summary, Input: DNase I
+0.9	Summary	DNase I	1.511520459750946	Method: Summary, Input: DNase I
+1	Summary	DNase I	1.433638569397814	Method: Summary, Input: DNase I
+0	Summary	ChromHMM	-0.165593244488511	Method: Summary, Input: ChromHMM
+0.1	Summary	ChromHMM	-0.04954406073188818	Method: Summary, Input: ChromHMM
+0.2	Summary	ChromHMM	0.4239204664916253	Method: Summary, Input: ChromHMM
+0.30000000000000004	Summary	ChromHMM	1.227778662103167	Method: Summary, Input: ChromHMM
+0.4	Summary	ChromHMM	1.6191731126883377	Method: Summary, Input: ChromHMM
+0.5	Summary	ChromHMM	1.8591788492628776	Method: Summary, Input: ChromHMM
+0.6000000000000001	Summary	ChromHMM	2.21773561948448	Method: Summary, Input: ChromHMM
+0.7000000000000001	Summary	ChromHMM	2.508512480812218	Method: Summary, Input: ChromHMM
+0.8	Summary	ChromHMM	2.8107650646292153	Method: Summary, Input: ChromHMM
+0.9	Summary	ChromHMM	2.6781846545447454	Method: Summary, Input: ChromHMM
+1	Summary	ChromHMM	2.5563113652875664	Method: Summary, Input: ChromHMM
+0	Binary	H3K4me3	-0.20515897572601555	Method: Binary, Input: H3K4me3
+0.1	Binary	H3K4me3	0.19668186176581695	Method: Binary, Input: H3K4me3
+0.2	Binary	H3K4me3	0.6364854431046697	Method: Binary, Input: H3K4me3
+0.30000000000000004	Binary	H3K4me3	1.0945093848437637	Method: Binary, Input: H3K4me3
+0.4	Binary	H3K4me3	1.5754660350894683	Method: Binary, Input: H3K4me3
+0.5	Binary	H3K4me3	1.8643194811684016	Method: Binary, Input: H3K4me3
+0.6000000000000001	Binary	H3K4me3	1.9213783031483993	Method: Binary, Input: H3K4me3
+0.7000000000000001	Binary	H3K4me3	2.1636375331354674	Method: Binary, Input: H3K4me3
+0.8	Binary	H3K4me3	2.3945033358971703	Method: Binary, Input: H3K4me3
+0.9	Binary	H3K4me3	2.8166019954598993	Method: Binary, Input: H3K4me3
+1	Binary	H3K4me3	2.795580111039389	Method: Binary, Input: H3K4me3
+0	Binary	DNase I	-0.19338421933111472	Method: Binary, Input: DNase I
+0.1	Binary	DNase I	0.12489142945288853	Method: Binary, Input: DNase I
+0.2	Binary	DNase I	0.4554706430952542	Method: Binary, Input: DNase I
+0.30000000000000004	Binary	DNase I	0.8519984576797893	Method: Binary, Input: DNase I
+0.4	Binary	DNase I	1.1364003806525729	Method: Binary, Input: DNase I
+0.5	Binary	DNase I	1.3413265175810831	Method: Binary, Input: DNase I
+0.6000000000000001	Binary	DNase I	1.346621841217442	Method: Binary, Input: DNase I
+0.7000000000000001	Binary	DNase I	1.3741847665235378	Method: Binary, Input: DNase I
+0.8	Binary	DNase I	1.5151594441148788	Method: Binary, Input: DNase I
+0.9	Binary	DNase I	1.368178019552224	Method: Binary, Input: DNase I
+1	Binary	DNase I	1.1986931688284392	Method: Binary, Input: DNase I
+0	Binary	ChromHMM	-0.2099603555908302	Method: Binary, Input: ChromHMM
+0.1	Binary	ChromHMM	-0.07879003154276291	Method: Binary, Input: ChromHMM
+0.2	Binary	ChromHMM	0.3703949247950856	Method: Binary, Input: ChromHMM
+0.30000000000000004	Binary	ChromHMM	1.1343348409610416	Method: Binary, Input: ChromHMM
+0.4	Binary	ChromHMM	1.6412666874750674	Method: Binary, Input: ChromHMM
+0.5	Binary	ChromHMM	1.9120059885739524	Method: Binary, Input: ChromHMM
+0.6000000000000001	Binary	ChromHMM	2.0310628945158182	Method: Binary, Input: ChromHMM
+0.7000000000000001	Binary	ChromHMM	2.2421217379788483	Method: Binary, Input: ChromHMM
+0.8	Binary	ChromHMM	2.7492981495322835	Method: Binary, Input: ChromHMM
+0.9	Binary	ChromHMM	2.8110363688247313	Method: Binary, Input: ChromHMM
+1	Binary	ChromHMM	2.291061531532121	Method: Binary, Input: ChromHMM
