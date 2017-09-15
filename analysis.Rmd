@@ -1,5 +1,5 @@
 ---
-title: '`chromswitch`: A flexible method to detect chromatin state switches - *Analysis*'
+title: 'chromswitch: A flexible method to detect chromatin state switches - *Analysis*'
 author: "Selin Jessa and Claudia L. Kleinman"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -23,10 +23,10 @@ knitr::opts_chunk$set(dev = c("png", "pdf"), # Display PNG but also keep PDF
                       cache.path = "cache/")
 ```
 
-# Overview
+# Introduction
 This document executes all the analysis presented in
 *chromswitch: A flexible method for detecting chromatin state switches*, from
-downloading the data, to running experiments, to generating the figures
+downloading the data, to running experiments, to generating the tables and figures
 included in the paper.
 
 
@@ -50,7 +50,7 @@ To run the analysis, this R Markdown file `analysis.Rmd` needs to be [knit](http
 typically evaluate the chunk once, and then set `eval = FALSE` for that chunk. The results are saved as an `.RData` file in the `computations` folder, and then loaded in a following chunk so that the results can be processed and visualized. To re-run the analysis, including these computationally-intensive steps, *that option needs to be changed back to `eval = TRUE` for every chunk*.
 
 Since the analysis would take multiple days to run, we
-recommend running the analysis from the command line, using the `run_analysis.sh`
+recommend running the analysis from the command line, using the `run.sh`
 bash script. If HPC resources are available, much of the work can be parallelized
 by modifying that script and setting the `n_cores` variable in the next section accordingly.
 
@@ -82,6 +82,7 @@ library(biomaRt)
 
 # General-purpose
 library(pROC)
+library(xtable)
 library(BiocParallel)
 library(parallel)
 library(magrittr)
@@ -662,7 +663,6 @@ roc_gg %>%
 
 ## AUROC
 
-*Table S1*
 ```{r auroc, warning = FALSE}
 
 calcAUC <- function(scores, method, input) {
@@ -683,10 +683,25 @@ benchmark_auc <- bind_rows(
   calcAUC(bench_b_k, "Binary", "H3K4me3"),
   calcAUC(bench_b_d, "Binary", "DNase I"),
   calcAUC(bench_b_c, "Binary", "ChromHMM")) %>% 
-  select(Method, Input, Consensus, Consensus_shuffle, Random) %T>%
-  write_tsv("figure_data/benchmark_auc.tsv")
+  select(Method, Input, Consensus, Consensus_shuffle, Random)
 
 benchmark_auc
+```
+
+*Table S1*
+```{r auc_latex}
+# A little manipulation to make the table for the supplementary
+
+benchmark_auc %>%
+  gather(Stat, Score, Consensus, Consensus_shuffle) %>%
+  rowwise() %>%
+  mutate(Method = ifelse(grepl("shuffle", Stat),
+                         paste0(Method, " (shuffled)"), Method)) %>%
+  ungroup() %>% 
+  dplyr::select(Method, Input, Score) %>%
+  spread(Input, Score) %T>%
+  write_tsv("figure_data/benchmark_auc.tsv") %>% 
+  xtable() # Generate latex code
 ```
 
 # Robustness experiments
