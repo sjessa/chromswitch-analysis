@@ -108,7 +108,7 @@ Set-up for parallel computations:
 ```{r n_cores}
 # For other parallel computations
 
-n_cores <- 20
+n_cores <- 1
 ```
 
 
@@ -623,7 +623,7 @@ roc_gg <- benchmark_roc %>%
 ```
 
 *Figure 1b*
-```{r fig1a, fig.width = 3.7, fig.height = 4.7}
+```{r fig1b, fig.width = 3.7, fig.height = 4.7}
 
 roc_gg %>%
     filter(Input != "DNase I") %>%
@@ -682,7 +682,7 @@ benchmark_auc <- bind_rows(
   calcAUC(bench_s_c, "Summary", "ChromHMM"),
   calcAUC(bench_b_k, "Binary", "H3K4me3"),
   calcAUC(bench_b_d, "Binary", "DNase I"),
-  calcAUC(bench_s_c, "Binary", "ChromHMM")) %>% 
+  calcAUC(bench_b_c, "Binary", "ChromHMM")) %>% 
   select(Method, Input, Consensus, Consensus_shuffle, Random) %T>%
   write_tsv("figure_data/benchmark_auc.tsv")
 
