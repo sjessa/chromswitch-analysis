@@ -265,6 +265,17 @@ benchmark <- read_tsv("input/benchmark.tsv") %>%
     keepStandardChromosomes()
 ```
 
+*Table S1*
+```{r table_s1}
+
+benchmark %>%
+  as.data.frame %>%
+  dplyr::select(gene_name, transcript_id, chr = seqnames, start, end, switch) %>% 
+  arrange(desc(switch), gene_name) %>% 
+  xtable()
+
+```
+
 ## Run `chromswitch` on benchmark dataset
 
 Here we evaluate each feature matrix construction strategy on each type of input.
@@ -688,7 +699,7 @@ benchmark_auc <- bind_rows(
 benchmark_auc
 ```
 
-*Table S1*
+*Table S2*
 ```{r auc_latex}
 # A little manipulation to make the table for the supplementary
 
