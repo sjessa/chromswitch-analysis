@@ -218,7 +218,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">chromswitch: A flexible method to detect chromatin state switches - <em>Analysis</em></h1>
 <h4 class="author"><em>Selin Jessa and Claudia L. Kleinman</em></h4>
-<h4 class="date"><em>22 September, 2017</em></h4>
+<h4 class="date"><em>30 September, 2017</em></h4>
 
 </div>
 
@@ -275,8 +275,9 @@ source(&quot;functions/plotting_functions.R&quot;)
 source(&quot;functions/subsampling_functions.R&quot;)
 source(&quot;functions/misc_functions.R&quot;)</code></pre>
 <p>Install <code>chromswitch</code> from the <a href="https://github.com/sjessa/chromswitch">GitHub repo</a>:</p>
-<pre class="r"><code>devtools::install_github(&quot;sjessa/chromswitch&quot;)
-library(chromswitch)</code></pre>
+<pre class="r"><code>devtools::install_github(&quot;sjessa/chromswitch&quot;)</code></pre>
+<pre><code>## Warning in get(Info[i, 1], envir = env): internal error -3 in R_decompress1</code></pre>
+<pre class="r"><code>library(chromswitch)</code></pre>
 <p>Set-up for parallel computations:</p>
 <pre class="r"><code># For other parallel computations
 
@@ -1036,7 +1037,7 @@ roc_df$iteration &lt;- factor(roc_df$iteration,
 </div>
 <div id="genome-wide-validation" class="section level1">
 <h1><span class="header-section-number">6</span> Genome-wide validation</h1>
-<p>To validate <code>chromswitch</code>, we will evaluate whether it’s capable of detecting chromatin state switches in regions around the transcription start sites of genes expressed specifically in the brain. We start by running <code>chromswitch</code> genome-wide to 5kb windows around TSS. <code>Chromswitch</code> makes a simple assessment of how chromatin states inferred from the data associate with the biological conditions of the samples, but we will need a more refined set of candidates to reasonably expect an association with gene expression data. Therefore, as candidates for validation, we select genes where the <code>chromswitch</code> finds an open chromatin state in brain tissues and closed chromatin in other tissues, evaluate whether these correspond to brain-specific expression.</p>
+<p>To validate <code>chromswitch</code>, we will evaluate whether it’s capable of detecting chromatin state switches that result in brain-specific expression. We start by running <code>chromswitch</code> genome-wide to 5kb windows around TSS. <code>Chromswitch</code> makes a simple assessment of how chromatin states inferred from the data associate with the biological conditions of the samples, but we will need a more refined set of candidates to reasonably expect an association with gene expression data. Therefore, as candidates for validation, we select genes where the <code>chromswitch</code> finds an open chromatin state in brain tissues and closed chromatin in other tissues, evaluate whether these correspond to brain-specific expression.</p>
 <div id="prepare-gtex-data" class="section level2">
 <h2><span class="header-section-number">6.1</span> Prepare GTEx data</h2>
 <p>We downloaded data from the <a href="https://gtexportal.org/">Genotype-Tissue Expression Project</a> database. The file <code>data/GTEx_Analysis_v6p_RNA-seq_RNA-SeQCv1.1.8_gene_median_rpkm.gct</code> was downloaded from the <em>RNA-seq</em> section at this link: <a href="https://gtexportal.org/home/datasets"><a href="https://gtexportal.org/home/datasets">https://gtexportal.org/home/datasets</a></a> and contains the mean RPKM per tissue type per gene.</p>
@@ -1500,37 +1501,35 @@ save(val_fc, file = &quot;computations/validation_fc.RData&quot;)</code></pre>
 ## [8] methods   base     
 ## 
 ## other attached packages:
-##  [1] bindrcpp_0.2                           
-##  [2] chromswitch_0.99.5                     
-##  [3] dplyr_0.7.3                            
-##  [4] readr_1.1.1                            
-##  [5] tidyr_0.7.1                            
-##  [6] tibble_1.3.4                           
-##  [7] tidyverse_1.1.1                        
-##  [8] purrr_0.2.3                            
-##  [9] plyr_1.8.4                             
-## [10] magrittr_1.5                           
-## [11] BiocParallel_1.10.1                    
-## [12] xtable_1.8-2                           
-## [13] pROC_1.10.0                            
-## [14] biomaRt_2.32.1                         
-## [15] Homo.sapiens_1.3.1                     
-## [16] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
-## [17] org.Hs.eg.db_3.4.1                     
-## [18] GO.db_3.4.1                            
-## [19] OrganismDbi_1.18.0                     
-## [20] GenomicFeatures_1.28.5                 
-## [21] AnnotationDbi_1.38.2                   
-## [22] Biobase_2.36.2                         
-## [23] rtracklayer_1.36.4                     
-## [24] GenomicRanges_1.28.5                   
-## [25] GenomeInfoDb_1.12.2                    
-## [26] IRanges_2.10.3                         
-## [27] S4Vectors_0.14.4                       
-## [28] BiocGenerics_0.22.0                    
-## [29] ggmin_0.0.0.9000                       
-## [30] ggplot2_2.2.1                          
-## [31] RColorBrewer_1.1-2                     
+##  [1] chromswitch_0.99.5                     
+##  [2] readr_1.1.1                            
+##  [3] tidyr_0.7.1                            
+##  [4] tibble_1.3.4                           
+##  [5] tidyverse_1.1.1                        
+##  [6] purrr_0.2.3                            
+##  [7] plyr_1.8.4                             
+##  [8] magrittr_1.5                           
+##  [9] BiocParallel_1.10.1                    
+## [10] xtable_1.8-2                           
+## [11] pROC_1.10.0                            
+## [12] biomaRt_2.32.1                         
+## [13] Homo.sapiens_1.3.1                     
+## [14] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
+## [15] org.Hs.eg.db_3.4.1                     
+## [16] GO.db_3.4.1                            
+## [17] OrganismDbi_1.18.0                     
+## [18] GenomicFeatures_1.28.5                 
+## [19] AnnotationDbi_1.38.2                   
+## [20] Biobase_2.36.2                         
+## [21] rtracklayer_1.36.4                     
+## [22] GenomicRanges_1.28.5                   
+## [23] GenomeInfoDb_1.12.2                    
+## [24] IRanges_2.10.3                         
+## [25] S4Vectors_0.14.4                       
+## [26] BiocGenerics_0.22.0                    
+## [27] ggmin_0.0.0.9000                       
+## [28] ggplot2_2.2.1                          
+## [29] RColorBrewer_1.1-2                     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] nlme_3.1-131               bitops_1.0-6              
@@ -1555,19 +1554,19 @@ save(val_fc, file = &quot;computations/validation_fc.RData&quot;)</code></pre>
 ## [39] BiocInstaller_1.26.1       bindr_0.1                 
 ## [41] jsonlite_1.5               RCurl_1.95-4.8            
 ## [43] GenomeInfoDbData_0.99.0    Matrix_1.2-11             
-## [45] Rcpp_0.12.12               munsell_0.4.3             
+## [45] Rcpp_0.12.13               munsell_0.4.3             
 ## [47] stringi_1.1.5              yaml_2.1.14               
 ## [49] SummarizedExperiment_1.6.4 zlibbioc_1.22.0           
 ## [51] grid_3.4.1                 blob_1.1.0                
 ## [53] forcats_0.2.0              lattice_0.20-35           
 ## [55] Biostrings_2.44.2          haven_1.1.0               
 ## [57] hms_0.3                    knitr_1.17                
-## [59] codetools_0.2-15           reshape2_1.4.2            
-## [61] XML_3.98-1.9               glue_1.1.1                
-## [63] evaluate_0.10.1            modelr_0.1.1              
-## [65] cellranger_1.1.0           gtable_0.2.0              
-## [67] assertthat_0.2.0           broom_0.4.2               
-## [69] GenomicAlignments_1.12.2   memoise_1.1.0             
+## [59] reshape2_1.4.2             XML_3.98-1.9              
+## [61] glue_1.1.1                 evaluate_0.10.1           
+## [63] modelr_0.1.1               cellranger_1.1.0          
+## [65] gtable_0.2.0               assertthat_0.2.0          
+## [67] broom_0.4.2                GenomicAlignments_1.12.2  
+## [69] memoise_1.1.0              bindrcpp_0.2              
 ## [71] cluster_2.0.6</code></pre>
 </div>
 

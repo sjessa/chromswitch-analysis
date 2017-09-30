@@ -1030,9 +1030,8 @@ roc_df %>%
 
 # Genome-wide validation
 
-To validate `chromswitch`, we will evaluate whether it's capable of detecting
-chromatin state switches in regions around the transcription start sites of
-genes expressed specifically in the brain. We start by running `chromswitch`
+To validate `chromswitch`, we will evaluate whether it's capable of detecting chromatin state switches
+that result in brain-specific expression. We start by running `chromswitch`
 genome-wide to 5kb windows around TSS. `Chromswitch` makes a simple assessment of how chromatin states
 inferred from the data associate with the biological conditions of the samples,
 but we will need a more refined set of candidates to reasonably expect an association with

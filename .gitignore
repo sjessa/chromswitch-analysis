@@ -3,6 +3,7 @@
 analysis.nb.html
 cache/*
 run_hydra.sh
+logs/*
 
 ## Generic
 
