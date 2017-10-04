@@ -104,6 +104,10 @@ devtools::install_github("sjessa/chromswitch")
 library(chromswitch)
 ```
 
+**Note on chromswitch version**: Although the above command will download the
+latest, development version of `chromswitch`, the bulk of the analysis was done
+using `v0.99.0`: https://github.com/sjessa/chromswitch/releases/tag/v0.99.0.
+
 Set-up for parallel computations:
 
 ```{r n_cores}
