@@ -100,13 +100,12 @@ source("functions/misc_functions.R")
 
 Install `chromswitch` from the [GitHub repo](https://github.com/sjessa/chromswitch):
 ```{r install_cs, message = FALSE, cache = FALSE}
-devtools::install_github("sjessa/chromswitch")
+devtools::install_github("sjessa/chromswitch@v0.99.0")
 library(chromswitch)
 ```
 
-**Note on chromswitch version**: Although the above command will download the
-latest, development version of `chromswitch`, the bulk of the analysis was done
-using `v0.99.0`: https://github.com/sjessa/chromswitch/releases/tag/v0.99.0.
+**Note on chromswitch version**: The above command will download
+v0.99.0 of `chromswitch`, with which the bulk of the analysis was done: https://github.com/sjessa/chromswitch/releases/tag/v0.99.0.
 
 Set-up for parallel computations:
 

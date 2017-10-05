@@ -218,7 +218,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">chromswitch: A flexible method to detect chromatin state switches - <em>Analysis</em></h1>
 <h4 class="author"><em>Selin Jessa and Claudia L. Kleinman</em></h4>
-<h4 class="date"><em>04 October, 2017</em></h4>
+<h4 class="date"><em>05 October, 2017</em></h4>
 
 </div>
 
@@ -275,9 +275,9 @@ source(&quot;functions/plotting_functions.R&quot;)
 source(&quot;functions/subsampling_functions.R&quot;)
 source(&quot;functions/misc_functions.R&quot;)</code></pre>
 <p>Install <code>chromswitch</code> from the <a href="https://github.com/sjessa/chromswitch">GitHub repo</a>:</p>
-<pre class="r"><code>devtools::install_github(&quot;sjessa/chromswitch&quot;)
+<pre class="r"><code>devtools::install_github(&quot;sjessa/chromswitch@v0.99.0&quot;)
 library(chromswitch)</code></pre>
-<p><strong>Note on chromswitch version</strong>: Although the above command will download the latest, development version of <code>chromswitch</code>, the bulk of the analysis was done using <code>v0.99.0</code>: <a href="https://github.com/sjessa/chromswitch/releases/tag/v0.99.0">https://github.com/sjessa/chromswitch/releases/tag/v0.99.0</a>.</p>
+<p><strong>Note on chromswitch version</strong>: The above command will download v0.99.0 of <code>chromswitch</code>, with which the bulk of the analysis was done: <a href="https://github.com/sjessa/chromswitch/releases/tag/v0.99.0">https://github.com/sjessa/chromswitch/releases/tag/v0.99.0</a>.</p>
 <p>Set-up for parallel computations:</p>
 <pre class="r"><code># For other parallel computations
 
@@ -1501,7 +1501,7 @@ save(val_fc, file = &quot;computations/validation_fc.RData&quot;)</code></pre>
 ## [8] methods   base     
 ## 
 ## other attached packages:
-##  [1] chromswitch_0.99.7                     
+##  [1] chromswitch_0.99.0                     
 ##  [2] dplyr_0.7.4                            
 ##  [3] readr_1.1.1                            
 ##  [4] tidyr_0.7.1                            
@@ -1523,7 +1523,7 @@ save(val_fc, file = &quot;computations/validation_fc.RData&quot;)</code></pre>
 ## [20] AnnotationDbi_1.38.2                   
 ## [21] Biobase_2.36.2                         
 ## [22] rtracklayer_1.36.4                     
-## [23] GenomicRanges_1.28.5                   
+## [23] GenomicRanges_1.28.6                   
 ## [24] GenomeInfoDb_1.12.2                    
 ## [25] IRanges_2.10.3                         
 ## [26] S4Vectors_0.14.4                       
