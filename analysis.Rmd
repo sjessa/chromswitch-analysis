@@ -8,6 +8,9 @@ output:
     number_sections: yes
     toc: yes
     toc_float: yes
+    code_folding: show
+    theme: "flatly"
+    highlight: "default"
   html_notebook:
     df_print: paged
     number_sections: yes
@@ -27,8 +30,8 @@ knitr::opts_chunk$set(dev = c("png", "pdf"), # Display PNG but also keep PDF
 This document executes all the analysis presented in
 *chromswitch: A flexible method for detecting chromatin state switches*, from
 downloading the data, to running experiments, to generating the tables and figures
-included in the paper.
-
+included in the paper. The dropdown in the top right corner of this HTML doument
+controls whether code is shown or hidden.
 
 **How this repository is set up:**
 
@@ -104,7 +107,8 @@ devtools::install_github("sjessa/chromswitch@v0.99.0")
 library(chromswitch)
 ```
 
-**Note on chromswitch version**: The above command will download
+**Note on chromswitch version**: `chromswitch` is [now available from
+Bioconductor 3.6](https://bioconductor.org/packages/release/bioc/html/chromswitch.html), but the above command will download
 v0.99.0 of `chromswitch`, with which the bulk of the analysis was done: https://github.com/sjessa/chromswitch/releases/tag/v0.99.0.
 
 Set-up for parallel computations:
