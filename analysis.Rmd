@@ -1450,7 +1450,8 @@ val_candidates_long_clean %>%
     ggplot(aes(x = Tissue, y = mean_RPKM)) +
     geom_boxplot(width = 0.65, outlier.shape = NA, aes(fill = Method),
                  position = position_dodge(width = 0.8)) +
-    scale_fill_manual(values = c("red", "#2f60af")) +
+    scale_fill_manual(values = c("Summary (n=220)" = "red",
+                                 "Binary (n=125)" = "#2f60af")) +
     facet_wrap(~ Input, ncol = 1) +
     ggmin::theme_min() +
     coord_cartesian(ylim = c(0, 55)) +
