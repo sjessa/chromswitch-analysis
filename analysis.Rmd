@@ -27,11 +27,17 @@ knitr::opts_chunk$set(dev = c("png", "pdf"), # Display PNG but also keep PDF
 ```
 
 # Introduction
+
 This document executes all the analysis presented in
 *chromswitch: A flexible method for detecting chromatin state switches*, from
 downloading the data, to running experiments, to generating the tables and figures
 included in the paper. The dropdown in the top right corner of this HTML doument
-controls whether code is shown or hidden.
+controls whether code is shown or hidden. The document can be navigated using the menu on the left.
+
+**About the project:**
+
+In this paper, we present an R/Bioconductor package, `chromswitch`, which implements a flexible method to detect chromatin state switches between samples in two biological conditions in a specific genomic region of interest given peaks or chromatin state calls from ChIP-seq data. `chromswitch` is available from Bioconductor 3.6 at [https://bioconductor.org/packages/chromswitch](https://bioconductor.org/packages/chromswitch). We analyze its
+performance on a benchmark dataset, study its robustness to changes in tuning parameters, sample size and imbalance, window size, and varying mark profiles; and perform a genome-wide validation.
 
 **How this repository is set up:**
 
@@ -39,12 +45,12 @@ controls whether code is shown or hidden.
 all the analysis
 - `input` contains a few individual data and metadata files needed for the analysis
 - `data` stores data which is downloaded during the analysis
-- `figures` contains all figures produced in the analysis
+- `figures` contains all figures produced in the analysis; the subfolder `heatmaps` stores the figures output by the tool
 - `functions` stores a few long functions used (`source()`'d by) the analysis
 - `computations` stores the results of computationally-intensive steps of the analysis,
 which are saved in the main document after being executed once, and then loaded
 for further analysis
-- `figure_data` stores the data behind each figure as TSV files
+- `tables` stores the data behind each figure as TSV files, and tables presented in the supplementary material
 
 
 **How to re-run the analysis:**
@@ -56,7 +62,6 @@ Since the analysis would take multiple days to run, we
 recommend running the analysis from the command line, using the `run.sh`
 bash script. If HPC resources are available, much of the work can be parallelized
 by modifying that script and setting the `n_cores` variable in the next section accordingly.
-
 
 **Dependencies:**
 
@@ -93,6 +98,7 @@ library(plyr)
 library(purrr)
 library(tidyverse)
 library(dplyr)
+library(stringi)
 
 # Source functions
 source("functions/plotting_functions.R")
@@ -101,26 +107,24 @@ source("functions/misc_functions.R")
 
 ```
 
-Install `chromswitch` from the [GitHub repo](https://github.com/sjessa/chromswitch):
+Install `chromswitch` from the [GitHub repository](https://github.com/sjessa/chromswitch):
 ```{r install_cs, message = FALSE, cache = FALSE}
 devtools::install_github("sjessa/chromswitch@v0.99.0")
 library(chromswitch)
 ```
 
 **Note on chromswitch version**: `chromswitch` is [now available from
-Bioconductor 3.6](https://bioconductor.org/packages/release/bioc/html/chromswitch.html), but the above command will download
+Bioconductor 3.6](https://bioconductor.org/packages/release/bioc/html/chromswitch.html), but for reproducibility, the above command will download
 v0.99.0 of `chromswitch`, with which the bulk of the analysis was done: https://github.com/sjessa/chromswitch/releases/tag/v0.99.0.
 
 Set-up for parallel computations:
 
 ```{r n_cores}
 # For other parallel computations
-
 n_cores <- 1
 ```
 
-
-`Chromswitch` is implemented in a relatively modular way, with a function for
+`chromswitch` is implemented in a relatively modular way, with a function for
 each step of the algorithm. It also provides two wrapper functions, one for
 each feature construction strategy, which runs the whole analysis.
 Although the wrapper functions in chromswitch can analyze multiple query regions in parallel,
@@ -131,8 +135,6 @@ might arise.
 safeCallSummary <- purrr::safely(chromswitch::callSummary)
 safeCallBinary  <- purrr::safely(chromswitch::callBinary)
 ```
-
-
 
 # Download epigenomic data
 
@@ -151,6 +153,14 @@ meta <- read_tsv("input/sample_metadata.tsv")
 meta
 table(meta$Condition)
 ```
+
+```{r noclobber}
+# Download the file if it doesn't exist
+noClobberDownload <- function(url, destpath) {
+    if(!(file.exists(destpath))) download.file(url, destpath)
+}
+```
+
 We retrieve the data from this link: [http://egg2.wustl.edu/roadmap/data/byFileType/](http://egg2.wustl.edu/roadmap/data/byFileType/).
 ```{r pk_k4me3, message = FALSE, eval = FALSE}
 
@@ -158,11 +168,6 @@ urls_k4 <- paste0("http://egg2.wustl.edu/roadmap/data/byFileType/peaks/consolida
                       meta$Sample, "-H3K4me3.narrowPeak.gz")
 basenames_k4 <- lapply(urls_k4, basename) %>% unlist()
 destpaths_k4 <- paste0("data/H3K4me3_peaks/", basenames_k4)
-
-# Download the file if it doesn't exist
-noClobberDownload <- function(url, destpath) {
-    if(!(file.exists(destpath))) download.file(url, destpath)
-}
 
 dl_k4 <- mcMap(noClobberDownload, urls_k4, destpaths_k4, mc.cores = n_cores)
 
@@ -195,7 +200,7 @@ save(pk_dnase, file = "computations/pk_dnase.RData")
 ```
 
 To convert the chromatin state segmentations into a format that can be used
-by chromswitch, we will filter to regions assigned "Active_TSS", the state
+by `chromswitch`, we will filter to regions assigned "Active_TSS", the state
 associated with active transcription.
 
 ```{r read_chromhmm, eval = FALSE}
@@ -278,8 +283,51 @@ benchmark <- read_tsv("input/benchmark.tsv") %>%
 benchmark %>%
   as.data.frame %>%
   dplyr::select(gene_name, transcript_id, chr = seqnames, start, end, switch) %>% 
-  arrange(desc(switch), gene_name) %>% 
+  arrange(desc(switch), gene_name) %T>% 
+  write_tsv("tables/tableS2.tsv") %>% 
   xtable()
+
+```
+
+## Prepare genome-wide windows for validation
+
+In order to later validate `chromswitch` genome-wide, we also clean up the gene list to define 5kbp
+windows genome-wide.
+
+```{r refseq_unique}
+
+refseq_unique <- all_genes %>% 
+      # Keep the longest transcript per gene
+      mutate(length = txEnd - txStart) %>%
+      group_by(gene_name) %>%
+      dplyr::slice(which.max(length)) %>% 
+      ungroup() %>% 
+      # Filter out genes where the length of the gene is less than half the
+      # window size
+      filter(length >= 2500)
+
+```
+
+```{r get_refseq}
+
+getRefSeq <- function(window) {
+    
+  d <- window / 2
+    
+  refseq_unique %>%
+      # Define window around the TSS
+      mutate(start = case_when(
+          strand == "+" ~ as.numeric(txStart) - d,
+          strand == "-" ~ as.numeric(txEnd) - d)) %>%
+      mutate(end = case_when(
+          strand == "+" ~ as.numeric(txStart) + d,
+          strand == "-" ~ as.numeric(txEnd) + d)) %T>% 
+      write_tsv(paste0("input/benchmark_coords.", window, ".tsv")) %>% 
+      makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>% 
+      keepStandardChromosomes(pruning.mode = "coarse")
+}
+
+refseq_5kbp <- getRefSeq(5000)
 
 ```
 
@@ -595,7 +643,7 @@ bench_b_c <- bind_cols(bench_b_c, shuffle_b_c) %>% addShuf()
 
 ## ROC curves
 
-The problem of a detecting a chromatin state switch in a region can be reframed as the problem of classifying the region as containing a switch between conditions or not. Therefore, our method can be regarded as a binary classifier, and evaluated accordingly. We evaluate the performance of our method on the benchmark set by computing Receiver-Operating Characteristic (ROC) curves based on the consensus score computed by `chromswitch`. ROC curves measure the tradeoff between the true positive rate and the false positive rate as the threshold on the consensus score is varied, as well as the area under the ROC curve (AUROC) which takes on a value of 1 for a perfect classifier and can be interpreted as the probability that chromswitch will score a randomly chosen region corresponding to a chromatin state switch higher than a randomly chosen region which does not exhibit a switch.
+The problem of a detecting a chromatin state switch in a region can be reframed as the problem of classifying the region as containing a switch between conditions or not. Therefore, our method can be regarded as a binary classifier, and evaluated accordingly. We evaluate the performance of our method on the benchmark set by computing Receiver-Operating Characteristic (ROC) curves based on the consensus score computed by `chromswitch`. ROC curves measure the tradeoff between the true positive rate and the false positive rate as the threshold on the consensus score is varied, as well as the area under the ROC curve (AUROC) which takes on a value of 1 for a perfect classifier and can be interpreted as the probability that `chromswitch` will score a randomly chosen region corresponding to a chromatin state switch higher than a randomly chosen region which does not exhibit a switch.
 
 ```{r calcROC = FALSE}
 calcROC <- function(scores, method, input, smooth) {
@@ -634,7 +682,7 @@ benchmark_roc <- bind_rows(
   filter(index != "Random" |
           (index == "Random") & (Method == "Binary") & (Input == "DNase I")) %>% 
   mutate(Input = ifelse(index == "Random", "NA", Input)) %T>% 
-  write_tsv("figure_data/benchmark_roc.tsv")
+  write_tsv("tables/benchmark_roc.tsv")
 
 roc_gg <- benchmark_roc %>% 
   makeLabel()
@@ -706,7 +754,7 @@ benchmark_auc <- bind_rows(
 benchmark_auc
 ```
 
-*Table S2*
+*Figure S1*
 ```{r auc_latex}
 # A little manipulation to make the table for the supplementary
 
@@ -718,15 +766,15 @@ benchmark_auc %>%
   ungroup() %>% 
   dplyr::select(Method, Input, Score) %>%
   spread(Input, Score) %T>%
-  write_tsv("figure_data/benchmark_auc.tsv") %>% 
+  write_tsv("tables/benchmark_auc.tsv") %>% 
   xtable() # Generate latex code
 ```
 
 # Robustness experiments
 
-## Robustness of position-aware strategy to changes in tuning parameters
+## Tuning parameters
 
-There are two parameters used in the feature construction process for the local
+There are two parameters used in the feature construction process for the binary
 approach, `gap` which controls whether nearby peaks within samples are connected, and `p` which controls how
 much overlap is required to call two peaks the same. To assess the impact
 of these parameters, we'll perform a grid search
@@ -813,7 +861,7 @@ plotGrid(grid_scores)
 ```
 
 
-## Effect of sample size and class imbalance
+## Sample size and class imbalance
 
 Next, we investigate how sensitive or robust `chromswitch` is to small numbers
 of samples and/or to datasets with high class imbalance (*i.e.* when samples
@@ -1023,7 +1071,7 @@ is plot in red (summary strategy) or blue (binary strategy).
 *Figure S2a*
 ```{r figS2a_subsamp_summary, fig.width = 8, fig.height = 5}
 roc_df %T>%
-    write_tsv("figure_data/subsampling_roc.tsv") %>% 
+    write_tsv("tables/subsampling_roc.tsv") %>% 
     filter(Method == "Summary" & Input == "H3K4me3") %>%
     plotSubsamp("red", "Summary", "H3K4me3")
 ```
@@ -1034,6 +1082,187 @@ roc_df %>%
     filter(Method == "Binary" & Input == "H3K4me3") %>%
     plotSubsamp("blue", "Binary", "H3K4me3")
 ```
+
+## Window size
+
+Since the `chromswitch` algorithm depends on the data in the genomic query window,
+which is selected by the user,
+we next considered the effect of variations in the window size. We studied how the
+consensus score changed as a function of the window size for three genes in our
+benchmark dataset, using H3K4me3 peaks.
+
+```{r windows}
+
+window_genes <- c("GRIK2", "CHRM1", "TTYH1")
+
+windows <- refseq_5kbp %>%
+	as.data.frame %>%
+	filter(gene_name %in% window_genes) %>%
+	select(-start, -end)
+
+get_window <- function(window_size, genes) {
+
+	d <- window_size / 2
+
+	genes %>%
+        # Define window around the TSS
+        mutate(start = case_when(
+            strand == "+" ~ as.numeric(txStart) - d,
+            strand == "-" ~ as.numeric(txEnd) - d)) %>%
+        mutate(end = case_when(
+            strand == "+" ~ as.numeric(txStart) + d,
+            strand == "-" ~ as.numeric(txEnd) + d)) %>%
+   	     mutate(gene_name = paste0(gene_name, "_", window_size/1000, "kbp"))
+}
+
+# Window sizes to test, in base pairs
+sizes <- c(seq(1000, 10000, by = 1000),
+           seq(10000, 50000, by = 10000),
+           100000, 250000, 500000)
+
+windows_gr <- lapply(sizes, get_window, windows) %>% bind_rows() %>%
+  makeGRangesFromDataFrame(keep.extra.columns = TRUE)
+
+```
+
+
+```{r windows_s, eval = FALSE, cache = FALSE}
+
+win_s <- callSummary(windows_gr,
+         peaks = pk_k4me3,
+         metadata = meta,
+         mark = "H3K4me3",
+         filter = TRUE,
+         filter_columns = c("qValue", "signalValue"),
+         filter_thresholds = c(10, 4),
+         normalize = TRUE,
+         normalize_columns = c("qValue", "signalValue"),
+         summarize_columns = c("qValue", "signalValue"),
+         length = FALSE,
+         fraction = TRUE,
+         n = FALSE,
+         optimal_clusters = TRUE,
+         heatmap = TRUE,
+         titles = paste0(windows_gr$gene_name, "_summary"),
+         outdir = "figures/heatmaps")
+
+win_s
+
+save(win_s, file = "computations/windowsize_s.RData")
+
+```
+
+
+```{r windows_b, eval = FALSE, cache = FALSE}
+
+win_b <- callBinary(query = win_to_test,
+                          peaks = pk_k4me3,
+                          metadata = meta,
+                          filter = TRUE,
+                          filter_columns = c("qValue","signalValue"),
+                          filter_thresholds = c(10, 4),
+                          reduce = TRUE,
+                          gap = 300,
+                          p = 0.4,
+                          optimal_clusters = TRUE,
+                          heatmap = TRUE,
+                          titles = paste0(windows_gr$gene_name, "_binary"),
+                          outdir = "figures/heatmaps",
+                          n_features = TRUE)
+
+win_b
+
+save(win_b, file = "computations/windowsize_b.RData")
+
+```
+
+*Figure SX*
+```{r figSX_windowsize, cache = FALSE, fig.width = 6, fig.height = 5}
+
+load("computations/windowsize_s.RData")
+load("computations/windowsize_b.RData")
+
+windows <- bind_rows(mutate(win_s, method = "Summary"), mutate(win_b, method = "Binary")) %>% 
+  select(gene_name, Consensus, method) %>% 
+  separate(gene_name, into = c("gene_name", "window_size"), sep = "_") %>% 
+  separate(window_size, into = c("window_size", "drop"), sep = "k") %>% 
+  select(-drop) %>% 
+  mutate(window_size = as.numeric(window_size)) %T>%
+  write_tsv("tables/window_size.tsv")
+
+# Plot TTYH1, "zoomed" in in the 0-50kbp range and in the 0-500kbp range
+ttyh1_short <- windows %>% 
+  filter(gene_name == "TTYH1") %>% 
+  filter(window_size <= 50) %>% 
+  mutate(range = "50kbp")
+
+ttyh1_long <- windows %>% 
+  filter(gene_name == "TTYH1") %>% 
+  filter(window_size <= 500) %>% 
+  mutate(range = "500kbp")
+
+bind_rows(ttyh1_short, ttyh1_long) %>% 
+  mutate(range = factor(range, levels = c("50kbp", "500kbp"))) %>% 
+  ggplot(aes(x = window_size, y = Consensus)) +
+  geom_point(aes(colour = method)) +
+  geom_line(aes(colour = method), alpha = 0.8, size = 0.5) +
+  scale_colour_manual(name = "Method", values = pal_methods) +
+  xlab("Window Size (kbp)") + ylab("Consensus score") +
+  facet_wrap(~ range, ncol = 1, scales = "free_x") +
+  ggmin::theme_min() +
+  theme(legend.position = c(0.9, 0.33)) +
+  theme(strip.background = element_blank(), strip.text.x = element_blank())
+
+```
+
+<!-- # Analysis of a dispersed mark -->
+
+<!-- ## Download data -->
+
+<!-- Compare human embryonic stem cells to the same adult tissues we looked at above. -->
+<!-- ```{r esc_meta} -->
+<!-- esc_meta <- read_tsv("input/esc_metadata.tsv") -->
+<!-- meta2 <- meta %>%  -->
+<!--   filter(Condition == "Other") %>%  -->
+<!--   mutate(Condition = "Adult") %>%  -->
+<!--   bind_rows(esc_meta) -->
+
+<!-- meta2 -->
+
+
+<!-- meta2 %>% write_tsv("input/meta2.tsv") -->
+<!-- ``` -->
+
+<!-- ```{r pk_k28me3, message = FALSE, eval = TRUE} -->
+
+<!-- urls_k27 <- paste0("http://egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak/", -->
+<!--                       meta2$Sample, "-H3K27me3.narrowPeak.gz") -->
+<!-- basenames_k27 <- lapply(urls_k27, basename) %>% unlist() -->
+<!-- destpaths_k27 <- paste0("data/H3K27me3_peaks/", basenames_k27) -->
+
+<!-- dl_k27 <- mcMap(noClobberDownload, urls_k27, destpaths_k27, mc.cores = n_cores) -->
+
+<!-- extra_cols <- c("name" = "character", "score" = "integer", "strand" = "character", -->
+<!--                 "signalValue" = "numeric", "pValue" = "numeric", "qValue" = "numeric", -->
+<!--                 "peak" = "numeric") -->
+
+<!-- pk_k27me3 <- lapply(destpaths_k27, rtracklayer::import, format = "bed", -->
+<!--                    extraCols = extra_cols) -->
+<!-- names(pk_k27me3) <- meta2$Sample -->
+
+<!-- save(pk_k27me3, file = "computations/pk_k27me3.RData") -->
+<!-- ``` -->
+
+<!-- ```{r esc_genes, eval = FALSE} -->
+
+<!-- prc_targets <- c("SIX1", "FGF3", "FOXI2", "BMP2", "GATA6") -->
+
+<!-- prc_targets_gr <- refseq_5kbp %>% -->
+<!--   as.data.frame %>%  -->
+<!--   filter(gene_name %in% prc_targets) %>%  -->
+<!--   makeGRangesFromDataFrame(keep.extra.columns = TRUE) -->
+
+<!-- ``` -->
 
 # Genome-wide validation
 
@@ -1140,43 +1369,6 @@ gtex_fc <- gtex_fc %>%
     mutate(FC     = (median_brain_RPKM + 1) / (median_other_RPKM + 1),
            log_FC = log(FC, base = 2))
 ```
-
-## Define genome-wide windows for input
-
-```{r refseq_unique}
-
-refseq_unique <- all_genes %>% 
-      # Keep the longest transcript per gene
-      mutate(length = txEnd - txStart) %>%
-      group_by(gene_name) %>%
-      dplyr::slice(which.max(length)) %>% 
-      ungroup() %>% 
-      # Filter out genes where the length of the gene is less than half the
-      # window size
-      filter(length >= 2500)
-```
-
-```{r get_refseq}
-getRefSeq <- function(window) {
-    
-  d <- window / 2
-    
-  refseq_unique %>%
-      # Define window around the TSS
-      mutate(start = case_when(
-          strand == "+" ~ as.numeric(txStart) - d,
-          strand == "-" ~ as.numeric(txEnd) - d)) %>%
-      mutate(end = case_when(
-          strand == "+" ~ as.numeric(txStart) + d,
-          strand == "-" ~ as.numeric(txEnd) + d)) %T>% 
-      write_tsv(paste0("input/benchmark_coords.", window, ".tsv")) %>% 
-      makeGRangesFromDataFrame(keep.extra.columns = TRUE) %>% 
-      keepStandardChromosomes(pruning.mode = "coarse")
-}
-
-refseq_5kbp <- getRefSeq(5000)
-```
-
 
 ## Run `chromswitch` genome wide
 
@@ -1439,7 +1631,7 @@ val_candidates_long_clean <- val_candidates_long %>%
     mutate(Label = ifelse(Tissue %in% brain, "Brain", "Other")) %>% 
     mutate(Tissue = factor(Tissue, levels = keep_tissue)) %>% 
     makeLabelSimple() %T>%
-    write_tsv("figure_data/validation_boxplot.tsv")
+    write_tsv("tables/validation_boxplot.tsv")
 
 ```
 
@@ -1489,7 +1681,7 @@ val_candidates_long_clean %>%
 
 Second, to quantify validation, we will assess how the difference in expression
 between brain and other tissues associates with the consensus score output by
-chromswitch. To do so, we calculate the log2 fold change of the mean RPKM
+`chromswitch`. To do so, we calculate the log2 fold change of the mean RPKM
 across tissues in each group, across candidate switches at each threshold on 
 the consensus score.
 
@@ -1537,7 +1729,7 @@ val_fc_tidy <- val_fc %>%
   separate(strategy, into = c("Method", "Input"), sep = "_") %>% 
   mutate(Input = recode(.x = Input, DNase = "DNase I")) %>% 
   makeLabelSimple() %T>%
-  write_tsv("figure_data/validation_foldchange.tsv")
+  write_tsv("tables/validation_foldchange.tsv")
 
 ```
 
@@ -1574,6 +1766,62 @@ val_fc_tidy %>%
   guides(colour = guide_legend(ncol = 1))
 
 ```
+
+
+
+## Run
+
+```{r run_k27_summary, warning = FALSE, error = FALSE}
+
+load("computations/pk_k27me3.RData")
+
+meta2$Sample <- as.character(meta2$Sample)
+
+prc_out_s_raw <- callSummary(prc_targets_gr,
+         peaks = pk_k27me3,
+         metadata = meta2,
+         mark = "H3K27me3",
+         filter = TRUE,
+         filter_columns = c("qValue", "signalValue"),
+         filter_thresholds = c(10, 10),
+         normalize = TRUE,
+         normalize_columns = c("qValue", "signalValue"),
+         summarize_columns = c("qValue", "signalValue"),
+         length = FALSE,
+         fraction = TRUE,
+         n = FALSE,
+         optimal_clusters = TRUE,
+         heatmap = TRUE,
+         titles = prc_targets_gr$gene_name,
+         outdir = "output/summary_heatmaps", BPPARAM = SerialParam())
+
+prc_out_s <- prc_out_s_raw$result[map_lgl(prc_out_s_raw$error, is_null)] %>% 
+  bind_rows()
+
+prc_out_s
+
+```
+
+```{r run_k27_binary}
+
+prc_out_b <- callBinary(query = prc_targets_gr,
+                          peaks = pk_k27me3,
+                          metadata = meta2,
+                          filter = TRUE,
+                          filter_columns = c("qValue","signalValue"),
+                          filter_thresholds = c(10, 10),
+                          reduce = TRUE,
+                          gap = 300,
+                          p = 0.4,
+                          optimal_clusters = TRUE,
+                          heatmap = TRUE,
+                          titles = prc_targets_gr$gene_name,
+                          outdir = "output/binary_heatmaps",
+                          n_features = TRUE)
+
+
+```
+
 
 # Session Info {#sessioninfo}
 
