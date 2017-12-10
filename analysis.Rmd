@@ -1177,7 +1177,7 @@ save(win_b, file = "computations/windowsize_b.RData")
 ```
 
 *Figure SX*
-```{r figSX_windowsize, cache = FALSE, fig.width = 6, fig.height = 5}
+```{r figSX_windowsize, fig.width = 6, fig.height = 5}
 
 load("computations/windowsize_s.RData")
 load("computations/windowsize_b.RData")
@@ -1215,54 +1215,115 @@ bind_rows(ttyh1_short, ttyh1_long) %>%
 
 ```
 
-<!-- # Analysis of a dispersed mark -->
+## Analysis of a dispersed mark
 
-<!-- ## Download data -->
+This package was initially designed to facilitate the task of identifying epigenetic changes for challenging datasets with abnormal patterns of enrichment of certain histone modifications, like H3K27me3. To analyze how `chromswitch` performs for a mark with a broad profile of enrichment, we will investigate a few regions where we expect a difference in K27me3 enrichment between human embryonic stem cells (ESC) and differentiated adult tissues.
 
-<!-- Compare human embryonic stem cells to the same adult tissues we looked at above. -->
-<!-- ```{r esc_meta} -->
-<!-- esc_meta <- read_tsv("input/esc_metadata.tsv") -->
-<!-- meta2 <- meta %>%  -->
-<!--   filter(Condition == "Other") %>%  -->
-<!--   mutate(Condition = "Adult") %>%  -->
-<!--   bind_rows(esc_meta) -->
+### Download data
 
-<!-- meta2 -->
+We use ESC samples from the Roadmap Epigenomics Project, compared to the same adult tissues we used above.
+```{r esc_meta, warning = FALSE}
+esc_meta <- meta %>%
+  filter(Condition == "Other") %>%
+  mutate(Condition = "Adult") %>%
+  bind_rows(read_tsv("input/esc_metadata.tsv"))
+
+esc_meta
+
+k27m_regions <- c(GRanges("chr7:27122134-27298855"), # HOX
+                  GRanges("chr16:54125741-57125741"), # IRX3 3 Mbp region
+                  GRanges("chr16:54313663-54328454")) # IRX3
+
+mcols(k27m_regions)$id <- c("HOX", "IRX3_3Mbp", "IRX3")
+```
+
+Download narrow peaks for H3K27me3:
+
+```{r pk_k27me3, message = FALSE, eval = TRUE}
+
+urls_k27 <- paste0("http://egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak/",
+                      esc_meta$Sample, "-H3K27me3.narrowPeak.gz")
+basenames_k27 <- lapply(urls_k27, basename) %>% unlist()
+destpaths_k27 <- paste0("data/H3K27me3_peaks/", basenames_k27)
+
+dl_k27 <- mcMap(noClobberDownload, urls_k27, destpaths_k27, mc.cores = n_cores)
+
+extra_cols <- c("name" = "character", "score" = "integer", "strand" = "character",
+                "signalValue" = "numeric", "pValue" = "numeric", "qValue" = "numeric",
+                "peak" = "numeric")
+
+pk_k27me3 <- lapply(destpaths_k27, rtracklayer::import, format = "bed",
+                   extraCols = extra_cols)
+names(pk_k27me3) <- esc_meta$Sample
+
+save(pk_k27me3, file = "computations/pk_k27me3.RData")
+```
+
+### Run `chromswitch` using H3K27me3 peaks
 
 
-<!-- meta2 %>% write_tsv("input/meta2.tsv") -->
-<!-- ``` -->
+```{r k27me3_s, eval = FALSE}
 
-<!-- ```{r pk_k28me3, message = FALSE, eval = TRUE} -->
+k27m_s <- callSummary(k27m_regions,
+            peaks = pk_k27me3,
+            metadata = esc_meta,
+            mark = "H3K27me3",
+            filter = TRUE,
+            filter_columns = c("qValue", "signalValue"),
+            filter_thresholds = c(10, 10),
+            normalize = TRUE,
+            normalize_columns = c("qValue", "signalValue"),
+            summarize_columns = c("qValue", "signalValue"),
+            length = FALSE,
+            fraction = TRUE,
+            n = FALSE,
+            optimal_clusters = TRUE,
+            heatmap = TRUE,
+            outdir = "figures/heatmaps",
+            titles = paste0(k27m_regions$id, "_summary"))
 
-<!-- urls_k27 <- paste0("http://egg2.wustl.edu/roadmap/data/byFileType/peaks/consolidated/narrowPeak/", -->
-<!--                       meta2$Sample, "-H3K27me3.narrowPeak.gz") -->
-<!-- basenames_k27 <- lapply(urls_k27, basename) %>% unlist() -->
-<!-- destpaths_k27 <- paste0("data/H3K27me3_peaks/", basenames_k27) -->
+save(k27m_s, file = "computations/h3k27me3_summary.RData")
 
-<!-- dl_k27 <- mcMap(noClobberDownload, urls_k27, destpaths_k27, mc.cores = n_cores) -->
+```
 
-<!-- extra_cols <- c("name" = "character", "score" = "integer", "strand" = "character", -->
-<!--                 "signalValue" = "numeric", "pValue" = "numeric", "qValue" = "numeric", -->
-<!--                 "peak" = "numeric") -->
+```{r k27me3_b, eval = FALSE}
 
-<!-- pk_k27me3 <- lapply(destpaths_k27, rtracklayer::import, format = "bed", -->
-<!--                    extraCols = extra_cols) -->
-<!-- names(pk_k27me3) <- meta2$Sample -->
+k27m_b <- callBinary(query = k27m_regions,
+           peaks = pk_k27me3,
+           metadata = esc_meta,
+           filter = TRUE,
+           filter_columns = c("qValue","signalValue"),
+           filter_thresholds = c(10, 10),
+           reduce = TRUE,
+           gap = 300,
+           p = 0.4,
+           optimal_clusters = TRUE,
+           heatmap = TRUE,
+           n_features = TRUE,
+           outdir = "figures/heatmaps",
+           titles = paste0(k27m_regions$id, "_binary"))
 
-<!-- save(pk_k27me3, file = "computations/pk_k27me3.RData") -->
-<!-- ``` -->
+save(k27m_b, file = "computations/h3k27me3_binary.RData")
 
-<!-- ```{r esc_genes, eval = FALSE} -->
+```
 
-<!-- prc_targets <- c("SIX1", "FGF3", "FOXI2", "BMP2", "GATA6") -->
+Presented in *Figures SX*
+```{r k27m_results}
 
-<!-- prc_targets_gr <- refseq_5kbp %>% -->
-<!--   as.data.frame %>%  -->
-<!--   filter(gene_name %in% prc_targets) %>%  -->
-<!--   makeGRangesFromDataFrame(keep.extra.columns = TRUE) -->
+load("computations/h3k27me3_summary.RData")
+load("computations/h3k27me3_binary.RData")
 
-<!-- ``` -->
+# By the summary strategy
+k27m_s %>% 
+  mutate(Method = "Summary") %>% 
+  select(region, id, k, Average_Silhouette, Consensus, Method)
+
+# By the binary strategy
+k27m_b %>% 
+  mutate(Method = "Binary") %>% 
+  select(region, id, k, Average_Silhouette, Consensus, Method)
+
+```
 
 # Genome-wide validation
 
@@ -1764,61 +1825,6 @@ val_fc_tidy %>%
   theme(legend.position = "bottom") +
   labs(colour = "") + labs(linetype = "") +
   guides(colour = guide_legend(ncol = 1))
-
-```
-
-
-
-## Run
-
-```{r run_k27_summary, warning = FALSE, error = FALSE}
-
-load("computations/pk_k27me3.RData")
-
-meta2$Sample <- as.character(meta2$Sample)
-
-prc_out_s_raw <- callSummary(prc_targets_gr,
-         peaks = pk_k27me3,
-         metadata = meta2,
-         mark = "H3K27me3",
-         filter = TRUE,
-         filter_columns = c("qValue", "signalValue"),
-         filter_thresholds = c(10, 10),
-         normalize = TRUE,
-         normalize_columns = c("qValue", "signalValue"),
-         summarize_columns = c("qValue", "signalValue"),
-         length = FALSE,
-         fraction = TRUE,
-         n = FALSE,
-         optimal_clusters = TRUE,
-         heatmap = TRUE,
-         titles = prc_targets_gr$gene_name,
-         outdir = "output/summary_heatmaps", BPPARAM = SerialParam())
-
-prc_out_s <- prc_out_s_raw$result[map_lgl(prc_out_s_raw$error, is_null)] %>% 
-  bind_rows()
-
-prc_out_s
-
-```
-
-```{r run_k27_binary}
-
-prc_out_b <- callBinary(query = prc_targets_gr,
-                          peaks = pk_k27me3,
-                          metadata = meta2,
-                          filter = TRUE,
-                          filter_columns = c("qValue","signalValue"),
-                          filter_thresholds = c(10, 10),
-                          reduce = TRUE,
-                          gap = 300,
-                          p = 0.4,
-                          optimal_clusters = TRUE,
-                          heatmap = TRUE,
-                          titles = prc_targets_gr$gene_name,
-                          outdir = "output/binary_heatmaps",
-                          n_features = TRUE)
-
 
 ```
 
