@@ -1,6 +1,6 @@
 # `chromswitch`: Analysis
 
-This repository contains the analysis presented in the paper *chromswitch: A flexible method for detecting chromatin state switches* (Selin Jessa and Claudia L. Kleinman).
+This repository accompanies the paper *chromswitch: A flexible method for detecting chromatin state switches* (Selin Jessa and Claudia L. Kleinman).
 
 A report of the complete analysis: [https://rawgit.com/sjessa/chromswitch-analysis/master/analysis.html](https://rawgit.com/sjessa/chromswitch-analysis/master/analysis.html).
 
