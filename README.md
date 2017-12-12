@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/103428474.svg)](https://zenodo.org/badge/latestdoi/103428474)
+
 # `chromswitch`: Analysis
 
 This repository accompanies the paper *chromswitch: A flexible method for detecting chromatin state switches* (Selin Jessa and Claudia L. Kleinman).
