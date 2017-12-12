@@ -80,11 +80,11 @@ makeGrid <- function(grid, input) {
     lapply(makeGrid)
   
   save(grid_scores,
-       file = paste0("figure_data/grid_scores.", input, ".RData"))
+       file = paste0("tables/grid_scores.", input, ".RData"))
   
   grid_scores_flat <- lapply(seq_along(grid_scores),
                              function(i) mutate(grid_scores[[i]],
                                                 score = eval_scores[i])) %>% 
     bind_rows() %T>%
-    write_tsv(paste0("figure_data/grid_scores.", input, ".tsv"))
+    write_tsv(paste0("tables/grid_scores.", input, ".tsv"))
 }

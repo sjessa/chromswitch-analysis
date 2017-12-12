@@ -690,7 +690,7 @@ roc_gg <- benchmark_roc %>%
 ```
 
 *Figure 1b*
-```{r fig1b, fig.width = 3.7, fig.height = 4.7}
+```{r fig1b, fig.width = 3.7, fig.height = 4.7, cache = FALSE}
 
 roc_gg %>%
     filter(Input != "DNase I") %>%
@@ -706,8 +706,8 @@ roc_gg %>%
     guides(colour = guide_legend(ncol = 1))
 ```
 
-*Figure S1*
-```{r figS1, fig.width = 7, fig.height = 5.2}
+*Figure S2*
+```{r figS2, fig.width = 7, fig.height = 5.2, cache = FALSE}
 
 roc_gg %>% 
     filter(index != "Random") %>% 
@@ -754,7 +754,7 @@ benchmark_auc <- bind_rows(
 benchmark_auc
 ```
 
-*Figure S1*
+*Figure S2*
 ```{r auc_latex}
 # A little manipulation to make the table for the supplementary
 
@@ -851,12 +851,12 @@ grid_out <- Map(function(gap, p) safeEvalParams(gap, p,
 save(grid_out, file = "computations/grid.RData")
 ```
 
-*Figure S3*
-```{r figS3_grid_k4me3, fig.width = 9, fig.height = 2.9, fig.keep = "last", fig.show = "last"}
+*Figure S4*
+```{r figS4_grid_k4me3, fig.width = 9, fig.height = 2.9, fig.keep = "last", fig.show = "last"}
 load("computations/grid.RData")
 makeGrid(grid_out, "H3K4me3")
 
-load("figure_data/grid_scores.H3K4me3.RData")
+load("tables/grid_scores.H3K4me3.RData")
 plotGrid(grid_scores)
 ```
 
@@ -1068,16 +1068,16 @@ In the figures below, the ROC curve for every individual subsample dataset is
 plot in a shade of gray, while the mean across iterations, for each combination,
 is plot in red (summary strategy) or blue (binary strategy).
 
-*Figure S2a*
-```{r figS2a_subsamp_summary, fig.width = 8, fig.height = 5}
+*Figure S3a*
+```{r figS3a_subsamp_summary, fig.width = 8, fig.height = 5}
 roc_df %T>%
     write_tsv("tables/subsampling_roc.tsv") %>% 
     filter(Method == "Summary" & Input == "H3K4me3") %>%
     plotSubsamp("red", "Summary", "H3K4me3")
 ```
 
-*Figure S2b*
-```{r figS2b_subsamp_binary, fig.width = 8, fig.height = 5, warn = FALSE}
+*Figure S3b*
+```{r figS3b_subsamp_binary, fig.width = 8, fig.height = 5, warn = FALSE}
 roc_df %>%
     filter(Method == "Binary" & Input == "H3K4me3") %>%
     plotSubsamp("blue", "Binary", "H3K4me3")
@@ -1176,8 +1176,8 @@ save(win_b, file = "computations/windowsize_b.RData")
 
 ```
 
-*Figure SX*
-```{r figSX_windowsize, fig.width = 6, fig.height = 5}
+*Figure S5*
+```{r figS5_windowsize, fig.width = 6, fig.height = 5}
 
 load("computations/windowsize_s.RData")
 load("computations/windowsize_b.RData")
@@ -1307,7 +1307,7 @@ save(k27m_b, file = "computations/h3k27me3_binary.RData")
 
 ```
 
-Presented in *Figures SX*
+Presented in *Figures S6-8*
 ```{r k27m_results}
 
 load("computations/h3k27me3_summary.RData")
@@ -1697,7 +1697,7 @@ val_candidates_long_clean <- val_candidates_long %>%
 ```
 
 *Figure 1c*
-```{r fig1c_validation_boxplot_k4me3, fig.height = 3, fig.width = 6}
+```{r fig1c_validation_boxplot_k4me3, fig.height = 3, fig.width = 6, cache = FALSE}
 
 val_candidates_long_clean %>%
     filter(Tissue %in% keep_tissue) %>%
@@ -1720,8 +1720,8 @@ val_candidates_long_clean %>%
 
 ```
 
-*Figure S5*
-```{r figS5_validation_boxplots, fig.height = 8, fig.width = 8}
+*Figure S10*
+```{r figS10_validation_boxplots, fig.height = 8, fig.width = 8}
 
 val_candidates_long_clean %>% 
     ggplot(aes(x = Tissue, y = mean_RPKM)) +
@@ -1795,7 +1795,7 @@ val_fc_tidy <- val_fc %>%
 ```
 
 *Figure 1d*
-```{r fig1d_validation_fc, fig.width = 3.7, fig.height = 4.5}
+```{r fig1d_validation_fc, fig.width = 3.7, fig.height = 4.5, cache = FALSE}
 
 val_fc_tidy %>% 
   filter(Input != "DNase I") %>% 
@@ -1811,8 +1811,8 @@ val_fc_tidy %>%
 
 ```
 
-*Figure S6*
-```{r figS6_validation_fc, fig.width = 7, fig.height = 7.5}
+*Figure S11*
+```{r figS11_validation_fc, fig.width = 7, fig.height = 7.5}
 
 val_fc_tidy %>% 
   ggplot(aes(x = thresholds, y = median_logFC)) +
