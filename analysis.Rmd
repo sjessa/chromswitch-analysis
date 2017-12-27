@@ -690,7 +690,7 @@ roc_gg <- benchmark_roc %>%
 ```
 
 *Figure 1b*
-```{r fig1b, fig.width = 3.7, fig.height = 4.7, cache = FALSE}
+```{r fig1b, fig.width = 3.7, fig.height = 4.7}
 
 roc_gg %>%
     filter(Input != "DNase I") %>%
@@ -707,7 +707,7 @@ roc_gg %>%
 ```
 
 *Figure S2*
-```{r figS2, fig.width = 7, fig.height = 5.2, cache = FALSE}
+```{r figS2, fig.width = 7, fig.height = 5.2}
 
 roc_gg %>% 
     filter(index != "Random") %>% 
@@ -1038,7 +1038,8 @@ mean_auc <- bind_rows(auc_s, auc_b) %>%
     mutate(dataset = factor(dataset, levels = lvls_combos_new)) %>%
     dplyr::select(dataset, iteration, AUC = Consensus, Method, Input) %>%
     group_by(dataset, Method, Input) %>%
-    summarise(mean_AUC = paste0("AUC: ", round(mean(AUC), 2)))
+    summarise(mean_AUC = paste0("AUC: ", round(mean(AUC), 2))) %T>%
+    write_tsv("tables/subsampling_auc.tsv")
 
 roc_s <- subsamp_s %>% map_df("roc") %>%
   mutate(Method = "Summary", Input = "H3K4me3")
@@ -1697,7 +1698,7 @@ val_candidates_long_clean <- val_candidates_long %>%
 ```
 
 *Figure 1c*
-```{r fig1c_validation_boxplot_k4me3, fig.height = 3, fig.width = 6, cache = FALSE}
+```{r fig1c_validation_boxplot_k4me3, fig.height = 3, fig.width = 6}
 
 val_candidates_long_clean %>%
     filter(Tissue %in% keep_tissue) %>%
@@ -1795,7 +1796,7 @@ val_fc_tidy <- val_fc %>%
 ```
 
 *Figure 1d*
-```{r fig1d_validation_fc, fig.width = 3.7, fig.height = 4.5, cache = FALSE}
+```{r fig1d_validation_fc, fig.width = 3.7, fig.height = 4.5}
 
 val_fc_tidy %>% 
   filter(Input != "DNase I") %>% 

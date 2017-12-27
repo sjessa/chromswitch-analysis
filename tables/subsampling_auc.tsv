@@ -1,0 +1,37 @@
+dataset	Method	Input	mean_AUC
+2 brain vs. 2 other	Binary	H3K4me3	AUC: 0.84
+2 brain vs. 2 other	Summary	H3K4me3	AUC: 0.82
+3 vs. 3	Binary	H3K4me3	AUC: 0.92
+3 vs. 3	Summary	H3K4me3	AUC: 0.88
+4 vs. 4	Binary	H3K4me3	AUC: 0.95
+4 vs. 4	Summary	H3K4me3	AUC: 0.91
+5 vs. 5	Binary	H3K4me3	AUC: 0.96
+5 vs. 5	Summary	H3K4me3	AUC: 0.93
+6 vs. 6	Binary	H3K4me3	AUC: 0.97
+6 vs. 6	Summary	H3K4me3	AUC: 0.94
+7 vs. 7	Binary	H3K4me3	AUC: 0.98
+7 vs. 7	Summary	H3K4me3	AUC: 0.94
+7 vs. 8	Binary	H3K4me3	AUC: 0.97
+7 vs. 8	Summary	H3K4me3	AUC: 0.95
+7 vs. 10	Binary	H3K4me3	AUC: 0.97
+7 vs. 10	Summary	H3K4me3	AUC: 0.97
+7 vs. 12	Binary	H3K4me3	AUC: 0.97
+7 vs. 12	Summary	H3K4me3	AUC: 0.97
+7 vs. 14	Binary	H3K4me3	AUC: 0.97
+7 vs. 14	Summary	H3K4me3	AUC: 0.98
+7 vs. 16	Binary	H3K4me3	AUC: 0.98
+7 vs. 16	Summary	H3K4me3	AUC: 0.98
+2 vs. 16	Binary	H3K4me3	AUC: 0.78
+2 vs. 16	Summary	H3K4me3	AUC: 0.97
+3 vs. 16	Binary	H3K4me3	AUC: 0.86
+3 vs. 16	Summary	H3K4me3	AUC: 0.98
+5 vs. 10	Binary	H3K4me3	AUC: 0.95
+5 vs. 10	Summary	H3K4me3	AUC: 0.97
+4 vs. 12	Binary	H3K4me3	AUC: 0.92
+4 vs. 12	Summary	H3K4me3	AUC: 0.98
+3 vs. 15	Binary	H3K4me3	AUC: 0.83
+3 vs. 15	Summary	H3K4me3	AUC: 0.98
+4 vs. 16	Binary	H3K4me3	AUC: 0.93
+4 vs. 16	Summary	H3K4me3	AUC: 0.99
+5 vs. 16	Binary	H3K4me3	AUC: 0.96
+5 vs. 16	Summary	H3K4me3	AUC: 0.99

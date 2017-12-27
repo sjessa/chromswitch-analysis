@@ -237,7 +237,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">chromswitch: A flexible method to detect chromatin state switches - <em>Analysis</em></h1>
 <h4 class="author"><em>Selin Jessa and Claudia L. Kleinman</em></h4>
-<h4 class="date"><em>11 December, 2017</em></h4>
+<h4 class="date"><em>27 December, 2017</em></h4>
 
 </div>
 
@@ -1049,7 +1049,8 @@ mean_auc &lt;- bind_rows(auc_s, auc_b) %&gt;%
     mutate(dataset = factor(dataset, levels = lvls_combos_new)) %&gt;%
     dplyr::select(dataset, iteration, AUC = Consensus, Method, Input) %&gt;%
     group_by(dataset, Method, Input) %&gt;%
-    summarise(mean_AUC = paste0(&quot;AUC: &quot;, round(mean(AUC), 2)))
+    summarise(mean_AUC = paste0(&quot;AUC: &quot;, round(mean(AUC), 2))) %T&gt;%
+    write_tsv(&quot;tables/subsampling_auc.tsv&quot;)
 
 roc_s &lt;- subsamp_s %&gt;% map_df(&quot;roc&quot;) %&gt;%
   mutate(Method = &quot;Summary&quot;, Input = &quot;H3K4me3&quot;)
@@ -1805,13 +1806,13 @@ save(val_fc, file = &quot;computations/validation_fc.RData&quot;)</code></pre>
 ## [53] blob_1.1.0                 crayon_1.3.4              
 ## [55] lattice_0.20-35            Biostrings_2.44.2         
 ## [57] haven_1.1.0                hms_0.4.0                 
-## [59] knitr_1.17                 reshape2_1.4.2            
-## [61] XML_3.98-1.9               glue_1.2.0                
-## [63] evaluate_0.10.1            modelr_0.1.1              
-## [65] cellranger_1.1.0           gtable_0.2.0              
-## [67] assertthat_0.2.0           broom_0.4.3               
-## [69] GenomicAlignments_1.12.2   memoise_1.1.0             
-## [71] cluster_2.0.6</code></pre>
+## [59] knitr_1.17                 codetools_0.2-15          
+## [61] reshape2_1.4.2             XML_3.98-1.9              
+## [63] glue_1.2.0                 evaluate_0.10.1           
+## [65] modelr_0.1.1               cellranger_1.1.0          
+## [67] gtable_0.2.0               assertthat_0.2.0          
+## [69] broom_0.4.3                GenomicAlignments_1.12.2  
+## [71] memoise_1.1.0              cluster_2.0.6</code></pre>
 </div>
 
 
